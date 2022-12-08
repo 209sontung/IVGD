@@ -25,16 +25,13 @@ python main.py # train the source localization model, which is the inverse of th
 
 ## Citation
 
-Please cite our paper if you use the code in your own work.
+  @inproceedings{IVGD_www22,
 
-@inproceedings{IVGD_www22,
+  title={{An Invertible Graph Diffusion Neural Network for Source Localization}},
 
-title={An Invertible Graph Diffusion Neural Network for Source Localization},
+  author={Junxiang Wang, Junji Jiang, and Liang Zhao},
 
-author={Junxiang Wang, Junji Jiang, and Liang Zhao},
+  booktitle={Proceedings of the 31th International World Wide Web Conference (WWW 2022)},
 
-booktitle={Proceedings of the 31th International World Wide Web Conference (WWW 2022)},
-
-year={2022}
-
+  year={2022}
 }
