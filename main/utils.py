@@ -5,6 +5,19 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import copy
+import pickle
+
+from data.sparsegraph import SparseGraph
+
+
+class CustomUnpickler(pickle.Unpickler):
+
+    def find_class(self, module, name):
+        if name == 'SparseGraph':
+            from data.sparsegraph import SparseGraph
+            return SparseGraph
+        return super().find_class(module, name)
+
 
 class SparseDropout(nn.Module):
     def __init__(self, p):
@@ -65,16 +78,16 @@ class MixedLinear(nn.Module):
 
     def extra_repr(self):
         return 'in_features={}, out_features={}, bias={}'.format(
-                self.in_features, self.out_features, self.bias is not None)
+            self.in_features, self.out_features, self.bias is not None)
 
 
 def sparse_matrix_to_torch(X):
     coo = X.tocoo()
     indices = np.array([coo.row, coo.col])
-    return torch.sparse.FloatTensor( # torch.sparse
-            torch.LongTensor(indices),
-            torch.FloatTensor(coo.data),
-            coo.shape)
+    return torch.sparse.FloatTensor(  # torch.sparse
+        torch.LongTensor(indices),
+        torch.FloatTensor(coo.data),
+        coo.shape)
 
 
 def matrix_to_torch(X):
@@ -89,17 +102,20 @@ def to_torch(X):
         X = to_nparray(X)
     return torch.FloatTensor(X)
 
+
 def to_nparray(X):
     if sp.isspmatrix(X):
         return X.toarray()
-    else: return X
+    else:
+        return X
+
 
 def sp2adj_lists(X):
     assert sp.isspmatrix(X), 'X should be sp.sparse'
     adj_lists = []
     if sp.isspmatrix(X):
         for i in range(X.shape[0]):
-            neighs = list( X[i,:].nonzero()[1] )
+            neighs = list(X[i, :].nonzero()[1])
             adj_lists.append(neighs)
         return adj_lists
     else:
@@ -111,28 +127,29 @@ def load_dataset(dataset, data_dir='data'):
     import pickle
     import sys
 
-    sys.path.append('data') # for pickle.load
+    sys.path.append('data')  # for pickle.load
 
     data_dir = Path(data_dir)
     suffix = '_25c.SG'
     graph_name = dataset + suffix
     path_to_file = data_dir / graph_name
-    with open(path_to_file, 'rb') as f:
-        graph = pickle.load(f)
+    graph = CustomUnpickler(open(path_to_file, 'rb')).load()
+    # with open(path_to_file, 'rb') as f:
+    #     graph = pickle.load(f)
     return graph
 
 
-
-def load_latest_ckpt(model_name, dataset, ckpt_dir='./checkpoints'): # get最新的checkpoint
+def load_latest_ckpt(model_name, dataset, ckpt_dir='./checkpoints'):  # get最新的checkpoint
     from pathlib import Path
     ckpt_dir = Path(ckpt_dir)
     ckpt_files = []
     for p in ckpt_dir.iterdir():
         if model_name in str(p) and dataset in str(p):
-            ckpt_files.append(str(p)) 
+            ckpt_files.append(str(p))
     if len(ckpt_files) > 0:
-        ckpt_file = sorted(ckpt_files, key=lambda x: x[-22:])[-1] 
-    else: raise FileNotFoundError
+        ckpt_file = sorted(ckpt_files, key=lambda x: x[-22:])[-1]
+    else:
+        raise FileNotFoundError
     print('checkpoint file:', ckpt_file)
     import torch
     state_dict = torch.load(ckpt_file)
@@ -167,22 +184,6 @@ def adj_process(adj):
     return adj
 
 
-def load_dataset(dataset, data_dir='data'):
-    from pathlib import Path
-    import pickle
-    import sys
-
-    sys.path.append('data')  # for pickle.load
-
-    data_dir = Path(data_dir)
-    suffix = '_25c.SG'
-    graph_name = dataset + suffix
-    path_to_file = data_dir / graph_name
-    with open(path_to_file, 'rb') as f:
-        graph = pickle.load(f)
-    return graph
-
-
 class InverseProblemDataset(torch.utils.data.Dataset):
     def __init__(self, dataset):
         self.dataset = dataset
@@ -206,4 +207,10 @@ class InverseProblemDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.data)
 
-    
+
+if __name__ == "__main__":
+    dataset = '/Users/sontung/PycharmProjects/Graph/IVGD (1)/data/covid_sample'
+    k = load_dataset(dataset)
+    print(k)
+
+
