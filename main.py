@@ -18,7 +18,7 @@ plt.style.use('seaborn')
 import torch.optim as optim
 
 # key parameters
-dataset = 'karate'  # 'karate','dolphins','jazz','netscience','cora_ml', 'power_grid'
+dataset = 'covid_sample'  # 'karate','dolphins','jazz','netscience','cora_ml', 'power_grid'
 model_name = 'deepis'  # 'deepis', ''
 graph = load_dataset(dataset)
 print(graph)
