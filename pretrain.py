@@ -15,7 +15,7 @@ logging.basicConfig(
 me_op = lambda x, y: np.mean(np.abs(x - y))
 te_op = lambda x, y: np.abs(np.sum(x) - np.sum(y))
 # key parameters
-dataset = 'karate' # 'karate','dolphins','jazz','netscience','cora_ml', 'power_grid'
+dataset = 'covid_sample' # 'karate','dolphins','jazz','netscience','cora_ml', 'power_grid'
 model_name = 'deepis' # 'deepis',
 graph = load_dataset(dataset)
 print(graph)
